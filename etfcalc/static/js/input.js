@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     load_data();
+    check_form_valid();
 });
 
 function save_data() {
