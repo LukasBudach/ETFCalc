@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     load_data();
+    check_form_valid();
 });
 
 function save_data() {
@@ -70,6 +71,7 @@ function remove_row(el) {
         let button = table.rows[0].querySelector('button');
         button.setAttribute('disabled', true);
     }
+    check_form_valid();
 }
 
 function ticker_value(el, ticker) {
@@ -98,10 +100,28 @@ function ticker_value(el, ticker) {
         let price_input = tr.querySelectorAll('input')[2];
         $(el).tooltip({ trigger: 'manual' }).tooltip('hide');
         price_input.value = data;
-
+        check_form_valid();
     });
 }
 
 function invalid_ticker(el) {
     $(el).tooltip({ trigger: 'manual' }).tooltip('show');
+}
+
+function check_form_valid() {
+    let form_is_valid = false;
+    let all_inputs = document.querySelectorAll('input');
+    let i = 0;
+    for (i; i < all_inputs.length; i += 3) {
+        let stock_symbol = all_inputs[i].value;
+        let share_count = all_inputs[i+1].value;
+        let stock_price = all_inputs[i+2].value;
+        if (stock_symbol) {
+            form_is_valid = (form_is_valid ||
+                ((share_count && (share_count > 0)) &&
+                (stock_price && (stock_price > 0))));
+        }
+    }
+    let calc_button = document.querySelector('#calculateBtn');
+    calc_button.disabled = !form_is_valid;
 }
