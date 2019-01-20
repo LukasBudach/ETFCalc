@@ -12,6 +12,11 @@ from .util.dateformatter import pretty_date
 
 app = Flask(__name__)
 
+# stop the browser from caching assets delivered by flask, because
+# otherwise changes made to the js files are more often than not
+# simply ignored because cached versions are used instead
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
 
 @app.route('/')
 def main(error=False):
@@ -55,10 +60,9 @@ def output():
     # news data
     news_data = []
     urls = []
+    news_list = []
     if data:
         news_list = data[:25]
-    else:
-        news_list = []
     for holding in news_list:
         news_items = holding.get_news()
         if news_items is None:
