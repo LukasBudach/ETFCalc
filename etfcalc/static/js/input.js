@@ -4,8 +4,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     load_data();
-    check_form_valid();
 });
+
+document.addEventListener('focusout', function () {
+    validate_inputs();
+})
+
+document.addEventListener('input', function () {
+    validate_inputs();
+})
 
 function save_data() {
     if (typeof (Storage) == 'undefined') {
@@ -47,6 +54,7 @@ function load_data() {
         row.querySelector('[name=shares]').value = data[i][1];
         row.querySelector('[name=prices]').value = data[i][2];
     }
+    validate_inputs();
 }
 
 function add_row() {
@@ -71,7 +79,7 @@ function remove_row(el) {
         let button = table.rows[0].querySelector('button');
         button.setAttribute('disabled', true);
     }
-    check_form_valid();
+    validate_inputs();
 }
 
 function ticker_value(el, ticker) {
@@ -100,7 +108,6 @@ function ticker_value(el, ticker) {
         let price_input = tr.querySelectorAll('input')[2];
         $(el).tooltip({ trigger: 'manual' }).tooltip('hide');
         price_input.value = data;
-        check_form_valid();
     });
 }
 
@@ -108,20 +115,22 @@ function invalid_ticker(el) {
     $(el).tooltip({ trigger: 'manual' }).tooltip('show');
 }
 
-function check_form_valid() {
-    let form_is_valid = false;
-    let all_inputs = document.querySelectorAll('input');
-    let i = 0;
-    for (i; i < all_inputs.length; i += 3) {
-        let stock_symbol = all_inputs[i].value;
-        let share_count = all_inputs[i+1].value;
-        let stock_price = all_inputs[i+2].value;
-        if (stock_symbol) {
-            form_is_valid = (form_is_valid ||
-                ((share_count && (share_count > 0)) &&
-                (stock_price && (stock_price > 0))));
+function validate_inputs() {
+    let valid_input = false;
+    let table = document.getElementById('holding-table');
+    let button = document.getElementById('submit');
+    for (let i = 0; i < table.rows.length; i++) {
+        let row = table.rows[i];
+        if (valid_row(row)) {
+            valid_input = true;
         }
     }
-    let calc_button = document.querySelector('#calculateBtn');
-    calc_button.disabled = !form_is_valid;
+    button.disabled = !valid_input;
+}
+
+function valid_row(row) {
+    let ticker = row.querySelector('[name=tickers]').value;
+    let shares = row.querySelector('[name=shares]').value;
+    let price = row.querySelector('[name=prices]').value;
+    return (ticker && shares && price);
 }
