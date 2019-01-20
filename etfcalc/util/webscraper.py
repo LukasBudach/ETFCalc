@@ -17,7 +17,7 @@ requests_cache.install_cache('cache_data', expire_after=expire_after)
 # Scrape name and holdings if any for a given ticker
 def scrape_ticker(ticker):
     holdings = []
-    data = get_data(ticker)
+    data = get_data(ticker, True)
 
     # invalid ticker
     if data is None:
@@ -30,18 +30,19 @@ def scrape_ticker(ticker):
     return holdings
 
 # Get the nasdaq data for a given ticker
-def get_data(ticker):
+def get_data(ticker, useYahoo):
     data = None
     tmp = {'Yahoo': False}
     try:
         data = pd.Series(tmp)
         data = data.append(symbols.loc[ticker])
     except KeyError:
-        logging.info('Failed to get data for ticker ', ticker, '. Attempting to get it from finance.yahoo.com')
-        data = _get_data_from_yahoo(ticker)
-    print(type(symbols))
-    print(type(data))
-    print(data)
+        data = None
+        if useYahoo:
+            logging.info('Failed to retrieve data for ticker ', ticker, '. Attempting to get it from finance.yahoo.com')
+            data = _get_data_from_yahoo(ticker)
+        else:
+            logging.info('Failed to retrieve data for ticker ', ticker)
     return data
 
 # Get latest price for a given ticker
@@ -54,11 +55,16 @@ def get_price(ticker):
 def get_company_data(tickers):
     company_data = {}
     data = _get_iex_data(tickers, ['company'])
+    for ticker in tickers:
+        if (ticker not in data) and (ticker != ''):
+            company = _get_company_from_yahoo(ticker)
+            if company is not None:
+                data[ticker] = company
     for ticker, stock in data.items():
         quote = stock['company']
         if quote is None:
             continue
-        company_data[ticker] = {'name' : quote['companyName'], 'sector' : quote['sector'], 'link' : quote['website']}
+        company_data[ticker] = {'name': quote['companyName'], 'sector': quote['sector'], 'link': quote['website']}
     return company_data
 
 
@@ -111,7 +117,8 @@ def _get_etf_data(ticker, data, holdings):
     for row in table('tbody tr').items():
         columns = list(row('td').items())
         ticker = columns[0].children("a").text()
-        holding_data = get_data(ticker)
+        # disable the backup scraping because it is just too slow for larger funds
+        holding_data = get_data(ticker, False)
         if holding_data is None:
             # fall back to getting name from scraped data
             name = columns[1].children("a").text()
@@ -213,7 +220,7 @@ def _get_etf_holding(entry):
     # handle normal cases of actual stocks
     if pq('a').length:
         ticker = pq('a').attr('href').split('/')[2].split(':')[0]
-        holding_data = get_data(ticker)
+        holding_data = get_data(ticker, False)
         if holding_data is None:
             # fall back to getting name from scraped data
             name = pq('a').text().split('(')[0]
@@ -255,11 +262,41 @@ def _get_data_from_yahoo(ticker):
         data_dict['Currency'] = quoteSummary['price']['currency']
         data_dict['Security Name'] = quoteSummary['price']['longName']
         data_dict['ETF'] = (quoteSummary['price']['quoteType'] == 'ETF')
-
+        data = pd.Series(data_dict)
     except KeyError:
-        print("No valid data found for " + ticker)
+        logging.warning("No valid data found for " + ticker)
 
-    data = pd.Series(data_dict)
-    print(data)
+    return data
+
+def _get_company_from_yahoo(ticker):
+    req = urllib.request.urlopen("https://finance.yahoo.com/quote/" + ticker)
+    htmlbytes = req.read()
+
+    htmlstring = htmlbytes.decode("utf8")
+    req.close()
+
+    objectStart = htmlstring.find("root.App.main") + 16
+    objectEnd = htmlstring.find("</script>", objectStart) - 12
+
+    shortStr = htmlstring[objectStart: objectEnd]
+
+    object = json.loads(shortStr)
+    data = {'company': {'symbol': ticker}}
+
+    try:
+        quoteSummary = object['context']['dispatcher']['stores']['QuoteSummaryStore']
+        company = data['company']
+        company['companyName'] = quoteSummary['price']['longName']
+        company['exchange'] = quoteSummary['price']['exchangeName']
+        company['industry'] = quoteSummary['summaryProfile']['industry']
+        company['website'] = quoteSummary['summaryProfile']['website']
+        company['description'] = quoteSummary['summaryProfile']['longBusinessSummary']
+        company['CEO'] = ''
+        company['issueType'] = ''
+        company['sector'] = quoteSummary['summaryProfile']['sector']
+        company['tags'] = []
+    except KeyError:
+        data = None
+        logging.warning("No valid company data found for " + ticker)
 
     return data

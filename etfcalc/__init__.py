@@ -79,7 +79,7 @@ def output():
 def ticker_value():
     ticker = request.form['ticker']
     ticker = ticker.upper()
-    ticker_data = webscraper.get_data(ticker)
+    ticker_data = webscraper.get_data(ticker, True)
     if ticker_data is None:
         logging.info('invalid ticker, ignoring', ticker)
         return 'null'

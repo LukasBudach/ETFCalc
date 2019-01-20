@@ -35,6 +35,7 @@ def handle_stock_data(holdings):
     news = get_stock_news(tickers[:50])
     for holding in holdings:
         ticker = holding.get_ticker()
+        company = None
         if ticker in company_data:
             company = company_data[holding.get_ticker()]
         if company is not None:
