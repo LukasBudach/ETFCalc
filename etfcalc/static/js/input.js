@@ -115,12 +115,11 @@ function check_form_valid() {
         let stock_symbol = all_inputs[i].value;
         let share_count = all_inputs[i+1].value;
         let stock_price = all_inputs[i+2].value;
+        console.log('form is valid prev: ' + form_is_valid)
         if (stock_symbol) {
-            if (share_count) {
-                if (stock_price) {
-                    form_is_valid = true;
-                }
-            }
+            form_is_valid = (form_is_valid ||
+                ((share_count && (share_count > 0)) &&
+                (stock_price && (stock_price > 0))));
             console.log('share count: ' + share_count);
             console.log('price per share: ' + stock_price);
             console.log('form is valid: ' + form_is_valid);
