@@ -3,6 +3,8 @@ import json
 import requests_cache
 import time
 import logging
+import pandas as pd
+import urllib.request
 from datetime import date, timedelta, datetime
 from pyquery import PyQuery
 from pandas_datareader.nasdaq_trader import get_nasdaq_symbols
@@ -33,7 +35,11 @@ def get_data(ticker):
     try:
         data = symbols.loc[ticker]
     except KeyError:
-        logging.info('Failed to get data for ticker ', ticker)
+        logging.info('Failed to get data for ticker ', ticker, '. Attempting to get it from finance.yahoo.com')
+        data =_get_data_from_yahoo(ticker)
+    print(type(symbols))
+    print(type(data))
+    print(data)
     return data
 
 # Get latest price for a given ticker
@@ -222,3 +228,32 @@ def _get_etf_holding(entry):
         ticker = data
     weight = entry['weight'][:-1]
     return Holding(name, ticker, weight)
+
+def _get_data_from_yahoo(ticker):
+    data = None
+
+    req = urllib.request.urlopen("https://finance.yahoo.com/quote/" + ticker)
+    htmlbytes = req.read()
+
+    htmlstring = htmlbytes.decode("utf8")
+    req.close()
+
+    objectStart = htmlstring.find("root.App.main") + 16
+    objectEnd = htmlstring.find("</script>", objectStart) - 12
+
+    shortStr = htmlstring[objectStart: objectEnd]
+
+    object = json.loads(shortStr)
+    data_dict = { }
+
+    try:
+        data_dict['price'] = \
+        object['context']['dispatcher']['stores']['QuoteSummaryStore']['financialData']['currentPrice']['raw']
+        data_dict['currency'] = object['context']['dispatcher']['stores']['QuoteSummaryStore']['price']['currency']
+    except KeyError:
+        print("No valid data found for " + ticker)
+
+    data = pd.Series(data_dict)
+    print(data)
+
+    return data
