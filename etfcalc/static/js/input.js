@@ -70,6 +70,7 @@ function remove_row(el) {
         let button = table.rows[0].querySelector('button');
         button.setAttribute('disabled', true);
     }
+    check_form_valid();
 }
 
 function ticker_value(el, ticker) {
@@ -98,7 +99,6 @@ function ticker_value(el, ticker) {
         let price_input = tr.querySelectorAll('input')[2];
         $(el).tooltip({ trigger: 'manual' }).tooltip('hide');
         price_input.value = data;
-        console.log(price_input);
         check_form_valid();
     });
 }
@@ -115,14 +115,10 @@ function check_form_valid() {
         let stock_symbol = all_inputs[i].value;
         let share_count = all_inputs[i+1].value;
         let stock_price = all_inputs[i+2].value;
-        console.log('form is valid prev: ' + form_is_valid)
         if (stock_symbol) {
             form_is_valid = (form_is_valid ||
                 ((share_count && (share_count > 0)) &&
                 (stock_price && (stock_price > 0))));
-            console.log('share count: ' + share_count);
-            console.log('price per share: ' + stock_price);
-            console.log('form is valid: ' + form_is_valid);
         }
     }
     let calc_button = document.querySelector('#calculateBtn');
