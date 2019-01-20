@@ -25,12 +25,14 @@ def output():
     ticker_list = request.form.getlist('tickers')
     share_list = request.form.getlist('shares')
     price_list = request.form.getlist('prices')
+    currency_list = request.form.getlist('currency')
 
-    for ticker, shares, price in zip(ticker_list, share_list, price_list):
+    for ticker, shares, price, currency in zip(ticker_list, share_list, price_list, currency_list):
         if not (ticker and shares and price):
             continue
         portfolio.set_amount(ticker.upper(), int(shares))
         portfolio.set_price(ticker.upper(), float(price))
+        portfolio.set_currency(ticker.upper(), str(currency))
 
     if portfolio.get_holdings():
         try:

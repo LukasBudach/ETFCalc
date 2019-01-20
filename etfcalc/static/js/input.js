@@ -47,6 +47,7 @@ function load_data() {
         row.querySelector('[name=shares]').value = data[i][1];
         row.querySelector('[name=prices]').value = data[i][2];
         row.querySelector('#currency_display').innerText = data[i][3];
+        row.querySelector('#currency_input').value = data[i][3];
     }
 }
 
@@ -100,16 +101,22 @@ function ticker_value(el, ticker) {
         let data_object = JSON.parse(data);
         let price_input = tr.querySelectorAll('input')[2];
         let currency_display = tr.querySelector('#currency_display');
+        let currency_input = tr.querySelector('#currency_input');
         $(el).tooltip({ trigger: 'manual' }).tooltip('hide');
         price_input.value = data_object.price;
         if (data_object.currency === 'EUR') {
-            currency_display.innerText = '€';
+            currency_input.value = currency_display.innerText = '€';
+
         } else {
-            currency_display.innerText = '$';
+            currency_input.value = currency_display.innerText = '$';
         }
     });
 }
 
 function invalid_ticker(el) {
     $(el).tooltip({ trigger: 'manual' }).tooltip('show');
+}
+
+function get_currency() {
+    return '€';
 }

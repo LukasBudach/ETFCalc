@@ -14,6 +14,7 @@ symbols = get_nasdaq_symbols()
 expire_after = timedelta(days=5)
 requests_cache.install_cache('cache_data', expire_after=expire_after)
 
+
 # Scrape name and holdings if any for a given ticker
 def scrape_ticker(ticker):
     holdings = []
@@ -28,6 +29,7 @@ def scrape_ticker(ticker):
     else:
         _get_stock_data(ticker, data, holdings)
     return holdings
+
 
 # Get the nasdaq data for a given ticker
 def get_data(ticker, useYahoo):
@@ -44,6 +46,7 @@ def get_data(ticker, useYahoo):
         else:
             logging.info('Failed to retrieve data for ticker ', ticker)
     return data
+
 
 # Get latest price for a given ticker
 def get_price(ticker):
@@ -190,6 +193,7 @@ def _make_request(url, redirects=True, throttle=0.0):
         raise ValueError('Request exception') from e
     return response
 
+
 # returns response hook function which sleeps for
 # timeout if the response is not yet cached
 def _throttle_hook(timeout):
@@ -238,6 +242,7 @@ def _get_etf_holding(entry):
     weight = entry['weight'][:-1]
     return Holding(name, ticker, weight)
 
+
 def _get_data_from_yahoo(ticker):
     data = None
 
@@ -267,6 +272,7 @@ def _get_data_from_yahoo(ticker):
         logging.warning("No valid data found for " + ticker)
 
     return data
+
 
 def _get_company_from_yahoo(ticker):
     req = urllib.request.urlopen("https://finance.yahoo.com/quote/" + ticker)
@@ -300,3 +306,21 @@ def _get_company_from_yahoo(ticker):
         logging.warning("No valid company data found for " + ticker)
 
     return data
+
+
+def get_EUR_USD_rate():
+    req = urllib.request.urlopen("https://finance.yahoo.com/quote/EURUSD=X")
+    htmlbytes = req.read()
+
+    htmlstring = htmlbytes.decode("utf8")
+    req.close()
+
+    objectStart = htmlstring.find("root.App.main") + 16
+    objectEnd = htmlstring.find("</script>", objectStart) - 12
+
+    shortStr = htmlstring[objectStart: objectEnd]
+
+    object = json.loads(shortStr)
+    rate = object['context']['dispatcher']['stores']['QuoteSummaryStore']['price']['regularMarketPrice']['raw']
+
+    return rate
