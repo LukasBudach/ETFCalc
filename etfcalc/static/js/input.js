@@ -20,7 +20,8 @@ function save_data() {
         let price = row.querySelector('[name=prices]').value;
         if (!(ticker && shares && price))
             continue;
-        data.push([ticker.toUpperCase(), shares, price]);
+        let currency = row.querySelector('#currency_display').innerText;
+        data.push([ticker.toUpperCase(), shares, price, currency]);
     }
     sessionStorage.setItem('form-data', JSON.stringify(data));
 }
@@ -45,6 +46,7 @@ function load_data() {
         row.querySelector('[name=tickers]').value = data[i][0];
         row.querySelector('[name=shares]').value = data[i][1];
         row.querySelector('[name=prices]').value = data[i][2];
+        row.querySelector('#currency_display').innerText = data[i][3];
     }
 }
 
