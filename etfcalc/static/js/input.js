@@ -98,10 +98,34 @@ function ticker_value(el, ticker) {
         let price_input = tr.querySelectorAll('input')[2];
         $(el).tooltip({ trigger: 'manual' }).tooltip('hide');
         price_input.value = data;
-
+        console.log(price_input);
+        check_form_valid();
     });
 }
 
 function invalid_ticker(el) {
     $(el).tooltip({ trigger: 'manual' }).tooltip('show');
+}
+
+function check_form_valid() {
+    let form_is_valid = false;
+    let all_inputs = document.querySelectorAll('input');
+    let i = 0;
+    for (i; i < all_inputs.length; i += 3) {
+        let stock_symbol = all_inputs[i].value;
+        let share_count = all_inputs[i+1].value;
+        let stock_price = all_inputs[i+2].value;
+        if (stock_symbol) {
+            if (share_count) {
+                if (stock_price) {
+                    form_is_valid = true;
+                }
+            }
+            console.log('share count: ' + share_count);
+            console.log('price per share: ' + stock_price);
+            console.log('form is valid: ' + form_is_valid);
+        }
+    }
+    let calc_button = document.querySelector('#calculateBtn');
+    calc_button.disabled = !form_is_valid;
 }
