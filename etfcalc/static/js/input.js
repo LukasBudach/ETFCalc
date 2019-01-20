@@ -95,10 +95,16 @@ function ticker_value(el, ticker) {
             invalid_ticker(el, ticker);
             return;
         }
+        let data_object = JSON.parse(data);
         let price_input = tr.querySelectorAll('input')[2];
+        let currency_display = tr.querySelector('#currency_display');
         $(el).tooltip({ trigger: 'manual' }).tooltip('hide');
-        price_input.value = data;
-
+        price_input.value = data_object.price;
+        if (data_object.currency === 'EUR') {
+            currency_display.innerText = '€';
+        } else {
+            currency_display.innerText = '$';
+        }
     });
 }
 

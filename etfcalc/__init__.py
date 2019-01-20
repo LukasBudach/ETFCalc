@@ -79,12 +79,18 @@ def output():
 def ticker_value():
     ticker = request.form['ticker']
     ticker = ticker.upper()
-    if (webscraper.get_data(ticker) is None):
+    ticker_data = webscraper.get_data(ticker)
+    if ticker_data is None:
         logging.info('invalid ticker, ignoring', ticker)
         return 'null'
 
-    price = webscraper.get_price(ticker)
-    return str(price)
+    stock_cost = {"price": 0, "currency": "USD"}
+    if ticker_data.loc['Yahoo']:
+        stock_cost["price"] = ticker_data['Price']
+        stock_cost["currency"] = ticker_data['Currency']
+    else:
+        stock_cost["price"] = webscraper.get_price(ticker)
+    return json.dumps(stock_cost)
 
 
 @app.template_filter('strftime')

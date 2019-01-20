@@ -32,11 +32,13 @@ def scrape_ticker(ticker):
 # Get the nasdaq data for a given ticker
 def get_data(ticker):
     data = None
+    tmp = {'Yahoo': False}
     try:
-        data = symbols.loc[ticker]
+        data = pd.Series(tmp)
+        data = data.append(symbols.loc[ticker])
     except KeyError:
         logging.info('Failed to get data for ticker ', ticker, '. Attempting to get it from finance.yahoo.com')
-        data =_get_data_from_yahoo(ticker)
+        data = _get_data_from_yahoo(ticker)
     print(type(symbols))
     print(type(data))
     print(data)
@@ -247,9 +249,13 @@ def _get_data_from_yahoo(ticker):
     data_dict = { }
 
     try:
-        data_dict['price'] = \
-        object['context']['dispatcher']['stores']['QuoteSummaryStore']['financialData']['currentPrice']['raw']
-        data_dict['currency'] = object['context']['dispatcher']['stores']['QuoteSummaryStore']['price']['currency']
+        quoteSummary = object['context']['dispatcher']['stores']['QuoteSummaryStore']
+        data_dict['Yahoo'] = True
+        data_dict['Price'] = _round_price(quoteSummary['financialData']['currentPrice']['raw'])
+        data_dict['Currency'] = quoteSummary['price']['currency']
+        data_dict['Security Name'] = quoteSummary['price']['longName']
+        data_dict['ETF'] = (quoteSummary['price']['quoteType'] == 'ETF')
+
     except KeyError:
         print("No valid data found for " + ticker)
 
