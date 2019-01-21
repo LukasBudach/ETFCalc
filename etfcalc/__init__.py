@@ -48,7 +48,7 @@ def output():
     for holding in data:
         sector = holding.get_sector()
         if sector is None:
-            continue
+            sector = 'Other/Unknown'
         current_weight = sector_data[sector]
         weight = holdings_calculator.round_weight(
             current_weight + holding.get_weight())
