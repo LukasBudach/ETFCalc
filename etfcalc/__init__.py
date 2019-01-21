@@ -30,7 +30,10 @@ def output():
     for ticker, shares, price, currency in zip(ticker_list, share_list, price_list, currency_list):
         if not (ticker and shares and price):
             continue
-        portfolio.set_amount(ticker.upper(), int(shares))
+        shares = int(shares)
+        if not shares > 0:
+            continue
+        portfolio.set_amount(ticker.upper(), shares)
         portfolio.set_price(ticker.upper(), float(price))
         portfolio.set_currency(ticker.upper(), str(currency))
 
