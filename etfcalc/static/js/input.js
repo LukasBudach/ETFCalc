@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 document.addEventListener('focusout', function () {
-    validate_inputs();
+    validate_inputs();    
 })
 
 document.addEventListener('input', function () {
@@ -120,6 +120,7 @@ function ticker_value(el, ticker) {
         } else {
             currency_input.value = currency_display.innerText = '$';
         }
+        validate_inputs();
     });
 }
 
@@ -144,5 +145,5 @@ function valid_row(row) {
     let ticker = row.querySelector('[name=tickers]').value;
     let shares = row.querySelector('[name=shares]').value;
     let price = row.querySelector('[name=prices]').value;
-    return (ticker && shares && price);
+    return (ticker && (shares > 0) && price);
 }
