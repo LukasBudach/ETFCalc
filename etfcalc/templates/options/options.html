@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/options.js') }}"></script>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/options.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row pt-5 pb-4">
+    <table class="table table-md">
+        <thead>
+            <tr>
+                <th colspan="2">Option</th>
+                <th width="50%">Description</th>
+            </tr>
+        </thead>
+        <tbody id="options-table">
+        {% for option in data %}
+            <tr>
+                <td width="35%"> {{ option.title}} </td>
+                {% if option.type == "toggle" %}
+                <td width="15%" class="input-td">
+                    <label class="switch">
+                        <input type="checkbox" checked="{{ option.value }}" name="option_val_toggle">
+                        <span class="slider round"> </span>
+                    </label>
+                </td>
+                {% else %}
+                <td width="15%">
+                    <input type="text" name="option_val_text" class="form-control narrow-input" value="{{ option.value }}">
+                </td>
+                {% endif %}
+                <td width="50%">
+                    {{ option.description }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="row float-right mr-1 pb-5">
+    <button type="button" class="btn btn-secondary mr-1" onclick="reset_options()">Reset</button>
+    <button type="submit" class="btn btn-primary" form="portfolio"
+        onclick="save_options()" id="submit">Save options</button>
+</div>
+
+{% endblock %}

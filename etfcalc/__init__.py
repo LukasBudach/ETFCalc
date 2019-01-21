@@ -18,6 +18,13 @@ def main(error=False):
     return render_template('input/input.html', error=error)
 
 
+@app.route('/options', methods=['POST'])
+def options():
+    options_str = request.form['options']
+    options_list = json.loads(options_str)
+    return render_template('options/options.html', data=options_list)
+
+
 @app.route('/output', methods=['POST'])
 def output():
     portfolio = Portfolio()
