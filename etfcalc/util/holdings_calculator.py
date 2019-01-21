@@ -1,6 +1,6 @@
 import requests_cache
 from operator import attrgetter
-from .webscraper import scrape_ticker, get_company_data, get_stock_news, get_EUR_USD_rate
+from .webscraper import scrape_ticker, get_company_data, get_stock_news, to_usd
 from .holding import Holding
 from .portfolio import Portfolio
 
@@ -11,8 +11,8 @@ def get_holdings(portfolio):
     for ticker, shares in portfolio.get_holdings().items():
         price = portfolio.get_price(ticker)
         currency = portfolio.get_currency(ticker)
-        if currency == '€':
-            price = price * get_EUR_USD_rate()
+        if currency != '$':
+            price = to_usd(price, currency)
         ratio = (shares * price) / total
         holdings = scrape_ticker(ticker)
         for holding in holdings:
@@ -66,7 +66,7 @@ def _get_total(portfolio):
     for ticker, shares in portfolio.get_holdings().items():
         price = portfolio.get_price(ticker)
         currency = portfolio.get_currency(ticker)
-        if currency == '€':
-            price = price * get_EUR_USD_rate()
+        if currency != '$':
+            price = to_usd(price, currency)
         total += shares * price
     return total

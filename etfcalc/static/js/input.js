@@ -116,7 +116,8 @@ function ticker_value(el, ticker) {
         price_input.value = data_object.price;
         if (data_object.currency === 'EUR') {
             currency_input.value = currency_display.innerText = '€';
-
+        } else if (data_object.currency === 'JPY') {
+            currency_input.value = currency_display.innerText = '¥';
         } else {
             currency_input.value = currency_display.innerText = '$';
         }

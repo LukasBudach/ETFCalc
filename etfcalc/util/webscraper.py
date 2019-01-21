@@ -247,26 +247,26 @@ def _get_data_from_yahoo(ticker):
     data = None
 
     req = urllib.request.urlopen("https://finance.yahoo.com/quote/" + ticker)
-    htmlbytes = req.read()
+    html_bytes = req.read()
 
-    htmlstring = htmlbytes.decode("utf8")
+    html_string = html_bytes.decode("utf8")
     req.close()
 
-    objectStart = htmlstring.find("root.App.main") + 16
-    objectEnd = htmlstring.find("</script>", objectStart) - 12
+    object_start = html_string.find("root.App.main") + 16
+    object_end = html_string.find("</script>", object_start) - 12
 
-    shortStr = htmlstring[objectStart: objectEnd]
+    html_string_cut = html_string[object_start: object_end]
 
-    object = json.loads(shortStr)
+    data_object = json.loads(html_string_cut)
     data_dict = { }
 
     try:
-        quoteSummary = object['context']['dispatcher']['stores']['QuoteSummaryStore']
+        quote_summary = data_object['context']['dispatcher']['stores']['QuoteSummaryStore']
         data_dict['Yahoo'] = True
-        data_dict['Price'] = _round_price(quoteSummary['financialData']['currentPrice']['raw'])
-        data_dict['Currency'] = quoteSummary['price']['currency']
-        data_dict['Security Name'] = quoteSummary['price']['longName']
-        data_dict['ETF'] = (quoteSummary['price']['quoteType'] == 'ETF')
+        data_dict['Price'] = _round_price(quote_summary['financialData']['currentPrice']['raw'])
+        data_dict['Currency'] = quote_summary['price']['currency']
+        data_dict['Security Name'] = quote_summary['price']['longName']
+        data_dict['ETF'] = (quote_summary['price']['quoteType'] == 'ETF')
         data = pd.Series(data_dict)
     except KeyError:
         logging.warning("No valid data found for " + ticker)
@@ -276,30 +276,30 @@ def _get_data_from_yahoo(ticker):
 
 def _get_company_from_yahoo(ticker):
     req = urllib.request.urlopen("https://finance.yahoo.com/quote/" + ticker)
-    htmlbytes = req.read()
+    html_bytes = req.read()
 
-    htmlstring = htmlbytes.decode("utf8")
+    html_string = html_bytes.decode("utf8")
     req.close()
 
-    objectStart = htmlstring.find("root.App.main") + 16
-    objectEnd = htmlstring.find("</script>", objectStart) - 12
+    object_start = html_string.find("root.App.main") + 16
+    object_end = html_string.find("</script>", object_start) - 12
 
-    shortStr = htmlstring[objectStart: objectEnd]
+    html_string_cut = html_string[object_start: object_end]
 
-    object = json.loads(shortStr)
+    data_object = json.loads(html_string_cut)
     data = {'company': {'symbol': ticker}}
 
     try:
-        quoteSummary = object['context']['dispatcher']['stores']['QuoteSummaryStore']
+        quote_summary = data_object['context']['dispatcher']['stores']['QuoteSummaryStore']
         company = data['company']
-        company['companyName'] = quoteSummary['price']['longName']
-        company['exchange'] = quoteSummary['price']['exchangeName']
-        company['industry'] = quoteSummary['summaryProfile']['industry']
-        company['website'] = quoteSummary['summaryProfile']['website']
-        company['description'] = quoteSummary['summaryProfile']['longBusinessSummary']
+        company['companyName'] = quote_summary['price']['longName']
+        company['exchange'] = quote_summary['price']['exchangeName']
+        company['industry'] = quote_summary['summaryProfile']['industry']
+        company['website'] = quote_summary['summaryProfile']['website']
+        company['description'] = quote_summary['summaryProfile']['longBusinessSummary']
         company['CEO'] = ''
         company['issueType'] = ''
-        company['sector'] = quoteSummary['summaryProfile']['sector']
+        company['sector'] = quote_summary['summaryProfile']['sector']
         company['tags'] = []
     except KeyError:
         data = None
@@ -308,19 +308,36 @@ def _get_company_from_yahoo(ticker):
     return data
 
 
-def get_EUR_USD_rate():
-    req = urllib.request.urlopen("https://finance.yahoo.com/quote/EURUSD=X")
-    htmlbytes = req.read()
+def _get_exchange_rate(base_curr, dest_curr):
+    req = urllib.request.urlopen("https://finance.yahoo.com/quote/" + base_curr + dest_curr +"=X")
+    html_bytes = req.read()
 
-    htmlstring = htmlbytes.decode("utf8")
+    html_string = html_bytes.decode("utf8")
     req.close()
 
-    objectStart = htmlstring.find("root.App.main") + 16
-    objectEnd = htmlstring.find("</script>", objectStart) - 12
+    object_start = html_string.find("root.App.main") + 16
+    object_end = html_string.find("</script>", object_start) - 12
 
-    shortStr = htmlstring[objectStart: objectEnd]
+    html_string_cut = html_string[object_start: object_end]
 
-    object = json.loads(shortStr)
-    rate = object['context']['dispatcher']['stores']['QuoteSummaryStore']['price']['regularMarketPrice']['raw']
+    data_object = json.loads(html_string_cut)
+    rate = 1
+    try:
+        rate = data_object['context']['dispatcher']['stores']['QuoteSummaryStore']['price']['regularMarketPrice']['raw']
+    except KeyError:
+        logging.warning("No valid conversion data found for " + base_curr + " to " + dest_curr +
+                        ". Using 1:1 conversion.")
 
     return rate
+
+
+def to_usd(amount, base_currency_symbol):
+    if base_currency_symbol == '€':
+        return amount * _get_exchange_rate('EUR', 'USD')
+    elif base_currency_symbol == '¥':
+        return amount * _get_exchange_rate('JPY', 'USD')
+    # expandable for a lot of different currencies
+    else:
+        logging.warning("Requested conversion from unknown currency symbol " + base_currency_symbol +
+                        " to USD. Using 1:1 conversion.")
+    return amount
