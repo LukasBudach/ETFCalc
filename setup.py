@@ -9,6 +9,7 @@ setup(
         'pandas_datareader',
         'pyquery',
         'requests_cache',
-        'pandas'
+        'pandas',
+        'requests'
     ],
 )

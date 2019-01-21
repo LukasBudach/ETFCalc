@@ -8,18 +8,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.addEventListener('focusout', function () {
     validate_inputs();    
-})
+});
 
 document.addEventListener('input', function () {
     validate_inputs();
-})
+});
 
 function save_data() {
     if (typeof (Storage) == 'undefined') {
         return;
     }
 
-    let data = []
+    let data = [];
     let table = document.getElementById('holding-table');
     for (let i = 0; i < table.rows.length; i++) {
         let row = table.rows[i];
@@ -64,7 +64,7 @@ function add_row() {
     let row = document.getElementsByTagName('template')[0];
     let table = document.getElementById('holding-table');
     let clone = row.content.cloneNode(true);
-    if (table.rows.length == 1) {
+    if (table.rows.length === 1) {
         let button = table.rows[0].querySelector('button');
         button.removeAttribute('disabled');
     }
@@ -78,7 +78,7 @@ function remove_row(el) {
     $(tr.querySelectorAll('input')[0]).tooltip({ trigger: 'manual' }).tooltip('hide');
     tr.parentElement.removeChild(tr);
 
-    if (table.rows.length == 1) {
+    if (table.rows.length === 1) {
         let button = table.rows[0].querySelector('button');
         button.setAttribute('disabled', true);
     }
@@ -104,7 +104,7 @@ function ticker_value(el, ticker) {
             console.log('Error fetching price data', data.error);
             return;
         }
-        if (data == 'null') {
+        if (data === 'null') {
             invalid_ticker(el, ticker);
             return;
         }
