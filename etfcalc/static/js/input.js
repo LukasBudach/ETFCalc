@@ -82,6 +82,11 @@ function remove_row(el) {
     validate_inputs();
 }
 
+function refresh_row(el) {
+    let tr = el.parentElement.parentElement;
+    ticker_value(el, tr.querySelector('[name="tickers"]').value);
+}
+
 function ticker_value(el, ticker) {
     if (!ticker) {
         return;
