@@ -7,8 +7,7 @@ function reset_options() {
     if (typeof (Storage) == 'undefined') {
         return;
     }
-    let defaults = [false, '$'];
-    sessionStorage.setItem('option-data', JSON.stringify(defaults));
+    sessionStorage.setItem('option-data', JSON.stringify(default_options));
 
     load_options();
 }

@@ -16,9 +16,9 @@ requests_cache.install_cache('cache_data', expire_after=expire_after)
 
 
 # Scrape name and holdings if any for a given ticker
-def scrape_ticker(ticker):
+def scrape_ticker(ticker, use_yahoo):
     holdings = []
-    data = get_data(ticker, True)
+    data = get_data(ticker, use_yahoo)
 
     # invalid ticker
     if data is None:

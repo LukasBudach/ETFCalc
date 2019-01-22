@@ -5,7 +5,7 @@ from .holding import Holding
 from .portfolio import Portfolio
 
 
-def get_holdings(portfolio):
+def get_holdings(portfolio, use_yahoo):
     data = {}
     total = _get_total(portfolio)
     for ticker, shares in portfolio.get_holdings().items():
@@ -14,7 +14,7 @@ def get_holdings(portfolio):
         if currency != '$':
             price = to_usd(price, currency)
         ratio = (shares * price) / total
-        holdings = scrape_ticker(ticker)
+        holdings = scrape_ticker(ticker, use_yahoo)
         for holding in holdings:
             underlying = holding.get_ticker()
             weight = float(holding.get_weight()) * ratio

@@ -32,6 +32,8 @@ def output():
     price_list = request.form.getlist('prices')
     currency_list = request.form.getlist('currency')
 
+    session_options = json.loads(request.form['options'])
+
     for ticker, shares, price, currency in zip(ticker_list, share_list, price_list, currency_list):
         if not (ticker and shares and price):
             continue
@@ -44,7 +46,7 @@ def output():
 
     if portfolio.get_holdings():
         try:
-            data = holdings_calculator.get_holdings(portfolio)
+            data = holdings_calculator.get_holdings(portfolio, session_options[0])
         except ValueError as e:
             logging.exception('Raised exception while making request')
             return main(True)
@@ -89,7 +91,10 @@ def output():
 def ticker_value():
     ticker = request.form['ticker']
     ticker = ticker.upper()
-    ticker_data = webscraper.get_data(ticker, True)
+
+    session_options = json.loads(request.form['options'])
+
+    ticker_data = webscraper.get_data(ticker, session_options[0])
     if ticker_data is None:
         logging.info('invalid ticker, ignoring', ticker)
         return 'null'

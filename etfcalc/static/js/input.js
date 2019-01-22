@@ -38,6 +38,8 @@ function load_data() {
     let table = document.getElementById('holding-table');
     let session_data = sessionStorage['form-data'];
 
+    document.querySelector('#session_options').value = get_options();
+
     if (!session_data) {
         return;
     }
@@ -94,7 +96,8 @@ function ticker_value(el, ticker) {
     spinner.classList.remove('hidden');
     $.ajax({
         data: {
-            ticker: ticker
+            ticker: ticker,
+            options: get_options()
         },
         type: 'POST',
         url: '/ticker_value'
@@ -147,4 +150,17 @@ function valid_row(row) {
     let shares = row.querySelector('[name=shares]').value;
     let price = row.querySelector('[name=prices]').value;
     return (ticker && (shares > 0) && price);
+}
+
+function get_options() {
+    if (typeof(Storage) == 'undefined') {
+        return '[]'
+    }
+
+    let data = sessionStorage['option-data'];
+    if (!data) {
+        return '[]'
+    }
+
+    return data;
 }
