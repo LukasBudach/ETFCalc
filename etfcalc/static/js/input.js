@@ -84,7 +84,18 @@ function remove_row(el) {
 
 function refresh_row(el) {
     let tr = el.parentElement.parentElement;
-    ticker_value(el, tr.querySelector('[name="tickers"]').value);
+    let ticker_input = tr.querySelector('[name="tickers"]');
+    ticker_value(ticker_input, ticker_input.value);
+}
+
+function refresh_table(el) {
+    let table = el.parentElement.parentElement.parentElement.parentElement;
+    let rows = table.querySelectorAll('tr');
+    // start at i = 1 to skit the header
+    for (let i = 1; i < rows.length; ++i) {
+        let ticker_input = rows[i].querySelector('[name="tickers"]');
+        ticker_value(ticker_input, ticker_input.value);
+    }
 }
 
 function ticker_value(el, ticker) {
