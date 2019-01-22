@@ -157,7 +157,7 @@ function get_options() {
         return '[]'
     }
 
-    let data = sessionStorage['option-data'];
+    let data = localStorage['option-data'];
     if (!data) {
         return '[]'
     }

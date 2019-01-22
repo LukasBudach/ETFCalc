@@ -7,7 +7,7 @@ function reset_options() {
     if (typeof (Storage) == 'undefined') {
         return;
     }
-    sessionStorage.setItem('option-data', JSON.stringify(default_options));
+    localStorage.setItem('option-data', JSON.stringify(default_options));
 
     load_options();
 }
@@ -40,12 +40,12 @@ function save_options() {
             continue;
         data.push(option);
     }
-    sessionStorage.setItem('option-data', JSON.stringify(data));
+    localStorage.setItem('option-data', JSON.stringify(data));
 }
 
 function load_options() {
     let table = document.getElementById('options-table');
-    let session_data = sessionStorage['option-data'];
+    let session_data = localStorage['option-data'];
 
      if (!session_data) {
          reset_options();

@@ -10,7 +10,7 @@ function set_defaults() {
         return;
     }
 
-    if (!sessionStorage['option-data']){
-        sessionStorage.setItem('option-data', JSON.stringify(default_options));
+    if (!localStorage['option-data']){
+        localStorage.setItem('option-data', JSON.stringify(default_options));
     }
 }
