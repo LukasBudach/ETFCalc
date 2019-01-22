@@ -18,11 +18,9 @@ def main(error=False):
     return render_template('input/input.html', error=error)
 
 
-@app.route('/options', methods=['POST'])
+@app.route('/options')
 def options():
-    options_str = request.form['options']
-    options_list = json.loads(options_str)
-    return render_template('options/options.html', data=options_list)
+    return render_template('options/options.html')
 
 
 @app.route('/output', methods=['POST'])

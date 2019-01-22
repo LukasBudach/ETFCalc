@@ -6,6 +6,29 @@
 {% endblock %}
 
 {% block content %}
+<template id="toggle-template">
+    <tr>
+        <td width="35%"> </td>
+        <td width="15%" class="input-td">
+            <label class="switch">
+                <input type="checkbox" name="option_val_toggle">
+                <span class="slider round"> </span>
+            </label>
+        </td>
+        <td width="50%"> </td>
+    </tr>
+</template>
+
+<template id="text-template">
+    <tr>
+        <td width="35%"> </td>
+        <td width="15%">
+            <input type="text" name="option_val_text" class="form-control narrow-input">
+        </td>
+        <td width="50%"> </td>
+    </tr>
+</template>
+
 <div class="row pt-5 pb-4">
     <table class="table table-md">
         <thead>
@@ -14,28 +37,7 @@
                 <th width="50%">Description</th>
             </tr>
         </thead>
-        <tbody id="options-table">
-        {% for option in data %}
-            <tr>
-                <td width="35%"> {{ option.title}} </td>
-                {% if option.type == "toggle" %}
-                <td width="15%" class="input-td">
-                    <label class="switch">
-                        <input type="checkbox" checked="{{ option.value }}" name="option_val_toggle">
-                        <span class="slider round"> </span>
-                    </label>
-                </td>
-                {% else %}
-                <td width="15%">
-                    <input type="text" name="option_val_text" class="form-control narrow-input" value="{{ option.value }}">
-                </td>
-                {% endif %}
-                <td width="50%">
-                    {{ option.description }}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
+        <tbody id="options-table"> </tbody>
     </table>
 </div>
 
