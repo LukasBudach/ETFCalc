@@ -14,6 +14,29 @@ document.addEventListener('input', function () {
     validate_inputs();
 });
 
+function save_incomplete_data() {
+    if (typeof (Storage) == 'undefined') {
+        return;
+    }
+
+    let data = [];
+    let table = document.getElementById('holding-table');
+    for (let i = 0; i < table.rows.length; i++) {
+        let row = table.rows[i];
+        let ticker = row.querySelector('[name=tickers]').value;
+        let shares = row.querySelector('[name=shares]').value;
+        let price = row.querySelector('[name=prices]').value;
+        if (!ticker) {
+            continue;
+        }
+        let currency = row.querySelector('#currency_display').innerText;
+
+        data.push([ticker.toUpperCase(), shares, price, currency]);
+        console.log(data);
+    }
+    sessionStorage.setItem('form-data', JSON.stringify(data));
+}
+
 function save_data() {
     if (typeof (Storage) == 'undefined') {
         return;
@@ -49,7 +72,7 @@ function load_data() {
     }
 
     for (let i = 0; i < data.length; i++) {
-        if (!(data[i][0] && data[i][1] && data[i][2]))
+        if (!(data[i][0]))
             continue;
 
         let row = table.rows[i];
@@ -105,10 +128,12 @@ function ticker_value(el, ticker) {
         spinner.classList.add('hidden');
         if (data.error) {
             console.log('Error fetching price data', data.error);
+            save_incomplete_data();
             return;
         }
         if (data === 'null') {
             invalid_ticker(el, ticker);
+            save_incomplete_data();
             return;
         }
         let data_object = JSON.parse(data);
@@ -125,6 +150,7 @@ function ticker_value(el, ticker) {
             currency_input.value = currency_display.innerText = '$';
         }
         validate_inputs();
+        save_incomplete_data();
     });
 }
 
