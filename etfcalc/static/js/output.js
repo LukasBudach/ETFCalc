@@ -106,6 +106,9 @@ function holding_modal(name, ticker) {
 }
 
 function price_display(quote_data) {
+    // title
+    $('#title').text(quote_data['symbol']);
+
     // price
     let price = parseFloat(quote_data['latestPrice'])
     $('#price').text(price);
@@ -122,7 +125,7 @@ function price_display(quote_data) {
     // formatted date and time
     let date = new Date(quote_data['latestUpdate']);
     var am_pm = (date.getHours() < 12) ? "AM" : "PM";
-    var hour = (date.getHours() < 12) ? date.getHours() : date.getHours() - 12;
+    var hour = (date.getHours() <= 12) ? date.getHours() : date.getHours() - 12;
     let timestring = months[date.getMonth()] + ' ' + date.getDate() + ', ' +
         hour + ':' + ('0' + date.getMinutes()).slice(-2) + ' ' + am_pm;
     $('#date').text(timestring);
@@ -137,20 +140,18 @@ function candle_chart(name, chart_data) {
         title: {
             text: name + " 1 Year Chart"
         },
-        subtitles: [{
-            text: "Weekly Averages"
-        }],
-        axisX: {
-        },
         axisY: {
             includeZero: false,
             prefix: "$",
         },
         toolTip: {
-            content: "Date: {x}<br/><strong>Price:</strong><br/>Open: {y[0]}, Close: {y[3]}<br />High: {y[1]}, Low: {y[2]}"
+            content: get_tooltip()
         },
         data: [{
             type: "candlestick",
+            color: "grey",
+            risingColor: "green",
+            fallingColor: "red",    
             yValueFormatString: "$##0.00",
             dataPoints: data_points
         }]
@@ -168,8 +169,15 @@ function candle_chart(name, chart_data) {
 
 function parse_data_points(chart_data, data_points) {
     for (day of chart_data) {
-        let date = new Date(day['date'])
+        let date = new Date(day['date']);
+        let change = day['change'].toFixed(2);
+        change = change > 0 ? '+' + change : change;
         let candle = [day['open'], day['high'], day['low'], day['close']];
-        data_points.push({ x: date, y: candle })
+        let data = [day['volume'].toLocaleString(), change];
+        data_points.push({ x: date, y: candle, label: data });
     }
+}
+
+function get_tooltip() {
+    return document.getElementById('tooltip').innerHTML;
 }
