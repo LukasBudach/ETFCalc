@@ -26,7 +26,12 @@
         <tbody>
             {% for holding in data %}
             <tr>
-                <td class="c2"><a href="{{ holding.link }}">{{ holding.name }}</a></td>
+                {% if holding.link == None %}
+                    <td class="c2">{{ holding.name }}</td>
+                {% else %}
+
+                    <td class="c2"><a href="{{ holding.link }}">{{ holding.name }}</a></td>
+                {% endif %}
                 <td class="c2">{{ holding.ticker }}</td>
                 {% if holding.sector == None %}
                     <td class="c2"> Other/Unknown </td>

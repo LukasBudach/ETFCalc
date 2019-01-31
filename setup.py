@@ -10,6 +10,7 @@ setup(
         'pyquery',
         'requests_cache',
         'pandas',
-        'requests'
+        'requests',
+        'FinanceScraper'
     ],
 )

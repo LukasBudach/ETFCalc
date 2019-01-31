@@ -9,10 +9,14 @@ from datetime import date, timedelta, datetime
 from pyquery import PyQuery
 from pandas_datareader.nasdaq_trader import get_nasdaq_symbols
 from .holding import Holding
+from financescraper import scraper, conversions
 
 symbols = get_nasdaq_symbols()
 expire_after = timedelta(days=5)
 requests_cache.install_cache('cache_data', expire_after=expire_after)
+
+yahoo_scraper = scraper.YahooScraper()
+usd_converter = conversions.CurrencyConverter('USD')
 
 
 # Scrape name and holdings if any for a given ticker
@@ -253,100 +257,53 @@ def _get_etf_holding(entry):
 
 
 def _get_data_from_yahoo(ticker):
-    data = None
+    scraped_data = yahoo_scraper.get_data(ticker)
 
-    req = urllib.request.urlopen("https://finance.yahoo.com/quote/" + ticker)
-    html_bytes = req.read()
-
-    html_string = html_bytes.decode("utf8")
-    req.close()
-
-    object_start = html_string.find("root.App.main") + 16
-    object_end = html_string.find("</script>", object_start) - 12
-
-    html_string_cut = html_string[object_start: object_end]
-
-    data_object = json.loads(html_string_cut)
-    data_dict = { }
+    data_dict = {}
 
     try:
-        quote_summary = data_object['context']['dispatcher']['stores']['QuoteSummaryStore']
-        data_dict['Yahoo'] = True
-        data_dict['Price'] = _round_price(quote_summary['financialData']['currentPrice']['raw'])
-        data_dict['Currency'] = quote_summary['price']['currency']
-        data_dict['Security Name'] = quote_summary['price']['longName']
-        data_dict['ETF'] = (quote_summary['price']['quoteType'] == 'ETF')
+        data_dict['Yahoo'] = (scraped_data.source == "Yahoo")
+        data_dict['Price'] = _round_price(scraped_data.price)
+        data_dict['Currency'] = scraped_data.currency
+        data_dict['Security Name'] = scraped_data.name
+        data_dict['ETF'] = scraped_data.etf
         data = pd.Series(data_dict)
-    except KeyError:
+    except AttributeError:
         logging.warning("No valid data found for " + ticker)
 
-    return data
+    return scraped_data if (scraped_data is None) else data
 
 
 def _get_company_from_yahoo(ticker):
-    req = urllib.request.urlopen("https://finance.yahoo.com/quote/" + ticker)
-    html_bytes = req.read()
+    data = yahoo_scraper.get_company_data(ticker)
 
-    html_string = html_bytes.decode("utf8")
-    req.close()
-
-    object_start = html_string.find("root.App.main") + 16
-    object_end = html_string.find("</script>", object_start) - 12
-
-    html_string_cut = html_string[object_start: object_end]
-
-    data_object = json.loads(html_string_cut)
-    data = {'company': {'symbol': ticker}}
+    data_dict = {'company': {'symbol': ticker}}
 
     try:
-        quote_summary = data_object['context']['dispatcher']['stores']['QuoteSummaryStore']
-        company = data['company']
-        company['companyName'] = quote_summary['price']['longName']
-        company['exchange'] = quote_summary['price']['exchangeName']
-        company['industry'] = quote_summary['summaryProfile']['industry']
-        company['website'] = quote_summary['summaryProfile']['website']
-        company['description'] = quote_summary['summaryProfile']['longBusinessSummary']
+        company = data_dict['company']
+        company['companyName'] = data.name
+        company['exchange'] = data.exchange
+        company['industry'] = data.industry
+        company['website'] = data.website
+        company['description'] = data.description
         company['CEO'] = ''
         company['issueType'] = ''
-        company['sector'] = quote_summary['summaryProfile']['sector']
+        company['sector'] = data.sector
         company['tags'] = []
-    except KeyError:
-        data = None
+    except AttributeError:
         logging.warning("No valid company data found for " + ticker)
 
-    return data
-
-
-def _get_exchange_rate(base_curr, dest_curr):
-    req = urllib.request.urlopen("https://finance.yahoo.com/quote/" + base_curr + dest_curr +"=X")
-    html_bytes = req.read()
-
-    html_string = html_bytes.decode("utf8")
-    req.close()
-
-    object_start = html_string.find("root.App.main") + 16
-    object_end = html_string.find("</script>", object_start) - 12
-
-    html_string_cut = html_string[object_start: object_end]
-
-    data_object = json.loads(html_string_cut)
-    rate = 1
-    try:
-        rate = data_object['context']['dispatcher']['stores']['QuoteSummaryStore']['price']['regularMarketPrice']['raw']
-    except KeyError:
-        logging.warning("No valid conversion data found for " + base_curr + " to " + dest_curr +
-                        ". Using 1:1 conversion.")
-
-    return rate
+    return data if (data is None) else data_dict
 
 
 def to_usd(amount, base_currency_symbol):
+    temp_amount = amount
     if base_currency_symbol == '€':
-        return amount * _get_exchange_rate('EUR', 'USD')
+        temp_amount = usd_converter.convert('EUR', amount)
     elif base_currency_symbol == '¥':
-        return amount * _get_exchange_rate('JPY', 'USD')
+        temp_amount = usd_converter.convert('JPY', amount)
     # expandable for a lot of different currencies
     else:
         logging.warning("Requested conversion from unknown currency symbol " + base_currency_symbol +
                         " to USD. Using 1:1 conversion.")
-    return amount
+    return amount if (temp_amount is None) else temp_amount
