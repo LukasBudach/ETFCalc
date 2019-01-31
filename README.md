@@ -6,7 +6,7 @@ An [exchange traded fund (etf)](https://en.wikipedia.org/wiki/Exchange-traded_fu
 ##  Steps Taken
 This project is a fork of [jjacobson/ETFCalc](https://github.com/jjacobson/ETFCalc). This project's master includes all changes made by me to this project, that I deem stable and enough of an improvement to be merged into the main project. Even if their pull-requests are denied in the main project, they can still be found here! I also try to keep the dev branch exactly up to date with the main project's master, but if you want to use that one I recommend simply going over to jjacobson and getting the app there. 
 
-Stock price data is retrieved from yahoo finance through the use of Pandas Datareader. ETF holdings are currently scraped from http://etfdb.com through python requests.
+Stock price data is retrieved from yahoo finance through the use of Pandas Datareader or a backup data scraper accessing the site itself. ETF holdings are currently scraped from http://etfdb.com through python requests.
 
 
 ## Project Setup
